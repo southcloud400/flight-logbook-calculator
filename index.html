@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Flight Logbook Calculator</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>Flight Logbook Calculator</h1>
+
+    <input
+        type="file"
+        id="image-input"
+        accept="image/*">
+
+    <p id="selected-file-name">画像が選択されていません</p>
+
+    <button id="read-button" type="button">
+        Read Flight Time
+    </button>
+
+    <div id="image-preview-area">
+        <img id="image-preview" alt="選択したログブック画像">
+    </div>
+
+    <script src="main.js"></script>
+
+</body>
+
+</html>

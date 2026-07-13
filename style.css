@@ -1,0 +1,14 @@
+body{
+    font-family:sans-serif;
+    margin:20px;
+}
+
+#image-input{
+    margin-bottom:20px;
+}
+
+#image-preview{
+    max-width:100%;
+    max-height:700px;
+    border:1px solid #ccc;
+}
