@@ -11,6 +11,19 @@ const selectedFileName =
 const readButton =
     document.getElementById("read-button");
 
+const resultMessage =
+    document.getElementById("result-message");
+
+const flightTimeTableBody =
+    document.getElementById(
+        "flight-time-table-body"
+    );
+
+const flightTimeTotalValue =
+    document.getElementById(
+        "flight-time-total-value"
+    );
+
 const WORKER_URL =
     "https://flight-logbook-worker.just-966.workers.dev";
 
@@ -77,6 +90,10 @@ readButton.addEventListener("click", async () => {
             );
         }
 
+        displayFlightTimes(
+            result.data.rows
+        );
+
     } catch (error) {
         console.error(
             "Flight Time reading error:",
@@ -114,4 +131,106 @@ function fileToDataUrl(file) {
 
         reader.readAsDataURL(file);
     });
+}
+
+function displayFlightTimes(rows) {
+
+    flightTimeTableBody.innerHTML = "";
+    flightTimeTotalValue.textContent = "0:00";
+
+    if (
+        !Array.isArray(rows) ||
+        rows.length === 0
+    ) {
+        resultMessage.textContent =
+            "Flight Timeは検出されませんでした。";
+
+        return;
+    }
+
+    resultMessage.textContent = "";
+
+    let totalMinutes = 0;
+
+    rows.forEach((rowData) => {
+
+        const tableRow =
+            document.createElement("tr");
+
+        const rowNumberCell =
+            document.createElement("td");
+
+        const flightTimeCell =
+            document.createElement("td");
+
+        rowNumberCell.textContent =
+            rowData.row;
+
+        flightTimeCell.textContent =
+            rowData.flightTime;
+
+        tableRow.appendChild(
+            rowNumberCell
+        );
+
+        tableRow.appendChild(
+            flightTimeCell
+        );
+
+        flightTimeTableBody.appendChild(
+            tableRow
+        );
+
+        totalMinutes +=
+            flightTimeToMinutes(
+                rowData.flightTime
+            );
+    });
+
+    flightTimeTotalValue.textContent =
+        minutesToFlightTime(totalMinutes);
+}
+
+function flightTimeToMinutes(flightTime) {
+
+    const parts =
+        flightTime.split(":");
+
+    if (parts.length !== 2) {
+        return 0;
+    }
+
+    const hours =
+        Number(parts[0]);
+
+    const minutes =
+        Number(parts[1]);
+
+    if (
+        !Number.isInteger(hours) ||
+        !Number.isInteger(minutes) ||
+        hours < 0 ||
+        minutes < 0 ||
+        minutes >= 60
+    ) {
+        return 0;
+    }
+
+    return hours * 60 + minutes;
+}
+
+
+function minutesToFlightTime(totalMinutes) {
+
+    const hours =
+        Math.floor(totalMinutes / 60);
+
+    const minutes =
+        totalMinutes % 60;
+
+    return (
+        hours +
+        ":" +
+        String(minutes).padStart(2, "0")
+    );
 }

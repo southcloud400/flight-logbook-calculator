@@ -12,7 +12,9 @@
 
 <body>
 
-    <h1>Flight Logbook Calculator</h1>
+    <header class="app-header">
+        <h2>Flight Logbook Calculator</h2>
+    </header>
 
     <input
         type="file"
@@ -24,6 +26,33 @@
     <button id="read-button" type="button">
         Read Flight Time
     </button>
+
+    <section id="result-area">
+        <h3>Flight Time</h3>
+
+        <p id="result-message">
+            読み取り結果はここに表示されます。
+        </p>
+
+        <div id="flight-time-table-area">
+            <table id="flight-time-table">
+                <thead>
+                    <tr>
+                        <th>Row</th>
+                        <th>Flight Time</th>
+                    </tr>
+                </thead>
+
+                <tbody id="flight-time-table-body">
+                </tbody>
+            </table>
+        </div>
+
+        <div id="flight-time-total">
+            Total Flight Time:
+            <strong id="flight-time-total-value">0:00</strong>
+        </div>
+    </section>
 
     <div id="image-preview-area">
         <img id="image-preview" alt="選択したログブック画像">

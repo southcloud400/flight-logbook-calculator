@@ -1,14 +1,152 @@
+*{
+    box-sizing:border-box;
+}
+
 body{
-    font-family:sans-serif;
-    margin:20px;
+    margin:0;
+    background:#eef1f4;
+    color:#1f2933;
+    font-family:monospace;
+}
+
+.app-header{
+    background:#101b2d;
+    color:white;
+    padding:8px 20px;
+    border-bottom:3px solid #314d73;
+    font-family:monospace;
+}
+
+.app-header h2{
+    margin:0;
+    letter-spacing:0.5px;
+    font-style:italic;
+    font-weight:bold;
+}
+
+
+#image-input,
+#selected-file-name,
+#read-button,
+#image-preview-area{
+    margin-left:20px;
+    margin-right:20px;
 }
 
 #image-input{
+    margin-top:20px;
+    margin-bottom:10px;
+    font-family:monospace;
+}
+
+#selected-file-name{
+    margin-top:0;
+    margin-bottom:12px;
+    font-size:13px;
+    color:#4b5563;
+}
+
+#read-button{
+    padding:8px 14px;
     margin-bottom:20px;
+    background:#243b5a;
+    color:white;
+    border:1px solid #58759b;
+    border-radius:3px;
+    font-family:monospace;
+    font-size:13px;
+    cursor:pointer;
+}
+
+#read-button:hover{
+    background:#304d73;
+}
+
+#read-button:disabled{
+    opacity:0.6;
+    cursor:default;
+}
+
+#image-preview-area{
+    padding:12px;
+    background:white;
+    border:1px solid #b8c1cc;
+    border-radius:3px;
 }
 
 #image-preview{
+    display:block;
     max-width:100%;
     max-height:700px;
-    border:1px solid #ccc;
+    margin:auto;
+}
+
+#result-area{
+    margin:0 20px 20px;
+    padding:12px;
+    background:white;
+    border:1px solid #b8c1cc;
+    border-radius:3px;
+}
+
+#result-area h3{
+    margin:0 0 10px;
+    font-size:15px;
+    color:#243b5a;
+}
+
+#result-message{
+    margin:0;
+    font-size:13px;
+    color:#4b5563;
+}
+
+#flight-time-list{
+    margin:0;
+    padding-left:24px;
+}
+
+#flight-time-list li{
+    margin:5px 0;
+    font-size:14px;
+    font-weight:bold;
+}
+
+#flight-time-total{
+    margin-top:12px;
+    padding-top:10px;
+    border-top:1px solid #b8c1cc;
+    font-size:14px;
+    color:#243b5a;
+}
+
+#flight-time-total-value{
+    font-size:16px;
+}
+
+#flight-time-table-area{
+    overflow-x:auto;
+}
+
+#flight-time-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+}
+
+#flight-time-table th,
+#flight-time-table td{
+    padding:7px 10px;
+    border:1px solid #b8c1cc;
+    text-align:center;
+}
+
+#flight-time-table th{
+    background:#e4e9ef;
+    color:#243b5a;
+}
+
+#flight-time-table td:first-child{
+    width:70px;
+    color:#4b5563;
 }
