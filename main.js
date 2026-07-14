@@ -28,6 +28,7 @@ const WORKER_URL =
     "https://flight-logbook-worker.just-966.workers.dev";
 
 let selectedImageFile = null;
+let flightTimeRows = [];
 
 
 imageInput.addEventListener("change", () => {
@@ -142,17 +143,24 @@ function displayFlightTimes(rows) {
         !Array.isArray(rows) ||
         rows.length === 0
     ) {
+        flightTimeRows = [];
+
         resultMessage.textContent =
             "Flight Timeは検出されませんでした。";
 
         return;
     }
 
+    flightTimeRows =
+        rows.map((rowData) => ({
+            ...rowData
+        }));
+
     resultMessage.textContent = "";
 
     let totalMinutes = 0;
 
-    rows.forEach((rowData) => {
+    flightTimeRows.forEach((rowData) => {
 
         const tableRow =
             document.createElement("tr");
@@ -163,11 +171,135 @@ function displayFlightTimes(rows) {
         const flightTimeCell =
             document.createElement("td");
 
+        const pusCell =
+            document.createElement("td");
+
+        const flightTimeInput =
+            document.createElement("input");
+
+        const pusInput =
+            document.createElement("input");
+
         rowNumberCell.textContent =
             rowData.row;
 
-        flightTimeCell.textContent =
+        flightTimeInput.type = "text";
+
+        flightTimeInput.value =
             rowData.flightTime;
+
+        flightTimeInput.className =
+            "flight-time-input";
+
+        flightTimeInput.dataset.row =
+            rowData.row;
+
+        flightTimeInput.addEventListener(
+            "input",
+            () => {
+
+                rowData.flightTime =
+                    flightTimeInput.value;
+
+                updateFlightTimeTotal();
+            }
+        );
+
+        flightTimeInput.addEventListener(
+            "blur",
+            () => {
+
+                const formattedValue =
+                    normalizeFlightTimeInput(
+                        flightTimeInput.value
+                    );
+
+                flightTimeInput.value =
+                    formattedValue;
+
+                rowData.flightTime =
+                    formattedValue;
+
+                updateFlightTimeTotal();
+            }
+        );
+
+        flightTimeInput.addEventListener(
+            "keydown",
+            (event) => {
+
+                if (event.key !== "Enter") {
+                    return;
+                }
+
+                event.preventDefault();
+
+                moveToNextTimeInput(
+                    flightTimeInput
+                );
+            }
+        );
+
+        pusInput.type = "text";
+
+        pusInput.value =
+            rowData.pus;
+
+        pusInput.className =
+            "flight-time-input";
+
+        pusInput.dataset.row =
+            rowData.row;
+
+        pusInput.addEventListener(
+            "input",
+            () => {
+
+                rowData.pus =
+                    pusInput.value;
+            }
+        );
+
+        pusInput.addEventListener(
+            "blur",
+            () => {
+
+                const formattedValue =
+                    normalizeFlightTimeInput(
+                        pusInput.value
+                    );
+
+                pusInput.value =
+                    formattedValue;
+
+                rowData.pus =
+                    formattedValue;
+            }
+        );
+
+        pusInput.addEventListener(
+            "keydown",
+            (event) => {
+
+                if (event.key !== "Enter") {
+                    return;
+                }
+
+                event.preventDefault();
+
+                moveToNextTimeInput(
+                    pusInput
+                );
+            }
+        );
+                
+        flightTimeCell.appendChild(
+            flightTimeInput
+        );
+
+        pusCell.appendChild(
+            pusInput
+        );
 
         tableRow.appendChild(
             rowNumberCell
@@ -175,6 +307,10 @@ function displayFlightTimes(rows) {
 
         tableRow.appendChild(
             flightTimeCell
+        );
+
+        tableRow.appendChild(
+            pusCell
         );
 
         flightTimeTableBody.appendChild(
@@ -187,8 +323,63 @@ function displayFlightTimes(rows) {
             );
     });
 
-    flightTimeTotalValue.textContent =
-        minutesToFlightTime(totalMinutes);
+    updateFlightTimeTotal();
+}
+
+function normalizeFlightTimeInput(value) {
+
+    const digits =
+        value.replace(/\D/g, "");
+
+    if (digits.length === 0) {
+        return "";
+    }
+
+    if (digits.length === 1) {
+        return `0:0${digits}`;
+    }
+
+    if (digits.length === 2) {
+        return `0:${digits}`;
+    }
+
+    const hours =
+        digits.slice(0, -2);
+
+    const minutes =
+        digits.slice(-2);
+
+    return `${Number(hours)}:${minutes}`;
+}
+
+function moveToNextTimeInput(currentInput) {
+
+    const currentCell =
+        currentInput.closest("td");
+
+    const currentRow =
+        currentCell.parentElement;
+
+    const columnIndex =
+        currentCell.cellIndex;
+
+    const nextRow =
+        currentRow.nextElementSibling;
+
+    if (!nextRow) {
+        return;
+    }
+
+    const nextInput =
+        nextRow.cells[columnIndex]
+            ?.querySelector("input");
+
+    if (!nextInput) {
+        return;
+    }
+
+    nextInput.focus();
+    nextInput.select();
 }
 
 function flightTimeToMinutes(flightTime) {
@@ -217,6 +408,22 @@ function flightTimeToMinutes(flightTime) {
     }
 
     return hours * 60 + minutes;
+}
+
+function updateFlightTimeTotal() {
+
+    let totalMinutes = 0;
+
+    flightTimeRows.forEach((rowData) => {
+
+        totalMinutes +=
+            flightTimeToMinutes(
+                rowData.flightTime
+            );
+    });
+
+    flightTimeTotalValue.textContent =
+        minutesToFlightTime(totalMinutes);
 }
 
 
