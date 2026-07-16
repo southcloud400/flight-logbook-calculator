@@ -1,12 +1,24 @@
 
-const imageInput =
-    document.getElementById("image-input");
+const leftImageInput =
+    document.getElementById(
+        "left-image-input"
+    );
 
-const imagePreview =
-    document.getElementById("image-preview");
+const rightImageInput =
+    document.getElementById(
+        "right-image-input"
+    );
 
-const selectedFileName =
-    document.getElementById("selected-file-name");
+const leftImagePreview =
+    document.getElementById(
+        "left-image-preview"
+    );
+
+const rightImagePreview =
+    document.getElementById(
+        "right-image-preview"
+    );
+
 
 const readButton =
     document.getElementById("read-button");
@@ -45,34 +57,58 @@ const timeColumns = [
 ];
 
 
-let selectedImageFile = null;
+let selectedLeftImageFile = null;
+let selectedRightImageFile = null;
 let flightTimeRows = [];
 
 
-imageInput.addEventListener("change", () => {
+leftImageInput.addEventListener(
+    "change",
+    () => {
 
-    selectedImageFile =
-        imageInput.files[0];
+        selectedLeftImageFile =
+            leftImageInput.files[0];
 
-    if (!selectedImageFile) {
-        return;
+        if (!selectedLeftImageFile) {
+            return;
+        }
+
+        const imageUrl =
+            URL.createObjectURL(
+                selectedLeftImageFile
+            );
+
+        leftImagePreview.src =
+            imageUrl;
     }
+);
 
-    selectedFileName.textContent =
-        selectedImageFile.name;
+rightImageInput.addEventListener(
+    "change",
+    () => {
 
-    const imageUrl =
-        URL.createObjectURL(selectedImageFile);
+        selectedRightImageFile =
+            rightImageInput.files[0];
 
-    imagePreview.src =
-        imageUrl;
-});
+        if (!selectedRightImageFile) {
+            return;
+        }
+
+        const imageUrl =
+            URL.createObjectURL(
+                selectedRightImageFile
+            );
+
+        rightImagePreview.src =
+            imageUrl;
+    }
+);
 
 
 readButton.addEventListener("click", async () => {
 
-    if (!selectedImageFile) {
-        alert("先にログブック画像を選択してください。");
+    if (!selectedLeftImageFile) {
+        alert("先に左ページ画像を選択してください。");
         return;
     }
 
@@ -81,7 +117,7 @@ readButton.addEventListener("click", async () => {
 
     try {
         const imageData =
-            await fileToDataUrl(selectedImageFile);
+            await fileToDataUrl(selectedLeftImageFile);
 
         const response =
             await fetch(WORKER_URL, {

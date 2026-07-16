@@ -228,3 +228,47 @@ body{
 #flight-time-table .total-row strong{
     font-size:15px;
 }
+
+.image-input-row{
+    display:flex;
+    align-items:center;
+    gap:24px;
+    margin:20px;
+    flex-wrap:wrap;
+}
+
+.image-input-group{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.image-input-group label{
+    font-weight:bold;
+    color:#243b5a;
+    white-space:nowrap;
+}
+
+.image-input-group input[type="file"]{
+    margin:0;
+    font-family:monospace;
+}
+
+
+.small-image-preview{
+    width:52px;
+    height:64px;
+    object-fit:cover;
+    border:1px solid #9aa7b5;
+    background:#ffffff;
+    display:none;
+}
+
+.small-image-preview[src]{
+    display:block;
+}
+
+#read-button{
+    display:block;
+    margin:0 20px 20px;
+}

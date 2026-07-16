@@ -16,15 +16,46 @@
         <h2>Flight Logbook Calculator</h2>
     </header>
 
-    <input
-        type="file"
-        id="image-input"
-        accept="image/*">
+    <div class="image-input-row">
 
-    <p id="selected-file-name">画像が選択されていません</p>
+        <div class="image-input-group">
+
+            <label for="left-image-input">
+                左ページ
+            </label>
+
+            <input
+                type="file"
+                id="left-image-input"
+                accept="image/*">
+
+            <img
+                id="left-image-preview"
+                class="small-image-preview"
+                alt="左ページ画像">
+        </div>
+
+        <div class="image-input-group">
+
+            <label for="right-image-input">
+                右ページ
+            </label>
+
+            <input
+                type="file"
+                id="right-image-input"
+                accept="image/*">
+
+            <img
+                id="right-image-preview"
+                class="small-image-preview"
+                alt="右ページ画像">
+        </div>
+
+    </div>
 
     <button id="read-button" type="button">
-        Read Flight Time
+        Read Logbook
     </button>
 
     <section id="result-area">
@@ -68,9 +99,6 @@
         </div>
     </section>
 
-    <div id="image-preview-area">
-        <img id="image-preview" alt="選択したログブック画像">
-    </div>
 
     <script src="main.js"></script>
 
