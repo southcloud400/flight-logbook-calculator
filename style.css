@@ -216,3 +216,15 @@ body{
     outline:2px solid #243b5a;
     outline-offset:-2px;
 }
+
+#flight-time-table .total-row th,
+#flight-time-table .total-row td{
+    height:34px;
+    background:#c8d0d8;
+    color:#1f2933;
+    font-weight:bold;
+}
+
+#flight-time-table .total-row strong{
+    font-size:15px;
+}

@@ -24,8 +24,26 @@ const flightTimeTotalValue =
         "flight-time-total-value"
     );
 
+const pusTotalValue =
+    document.getElementById(
+        "pus-total-value"
+    );
+
 const WORKER_URL =
     "https://flight-logbook-worker.just-966.workers.dev";
+
+
+const timeColumns = [
+        {
+            property: "flightTime",
+            update: updateFlightTimeTotal
+        },
+        {
+            property: "pus",
+            update: updatePusTotal
+        }
+];
+
 
 let selectedImageFile = null;
 let flightTimeRows = [];
@@ -138,6 +156,7 @@ function displayFlightTimes(rows) {
 
     flightTimeTableBody.innerHTML = "";
     flightTimeTotalValue.textContent = "0:00";
+    pusTotalValue.textContent = "0:00";
 
     if (
         !Array.isArray(rows) ||
@@ -158,8 +177,6 @@ function displayFlightTimes(rows) {
 
     resultMessage.textContent = "";
 
-    let totalMinutes = 0;
-
     flightTimeRows.forEach((rowData) => {
 
         const tableRow =
@@ -168,162 +185,106 @@ function displayFlightTimes(rows) {
         const rowNumberCell =
             document.createElement("td");
 
-        const flightTimeCell =
-            document.createElement("td");
-
-        const pusCell =
-            document.createElement("td");
-
-        const flightTimeInput =
-            document.createElement("input");
-
-        const pusInput =
-            document.createElement("input");
-
         rowNumberCell.textContent =
             rowData.row;
-
-        flightTimeInput.type = "text";
-
-        flightTimeInput.value =
-            rowData.flightTime;
-
-        flightTimeInput.className =
-            "flight-time-input";
-
-        flightTimeInput.dataset.row =
-            rowData.row;
-
-        flightTimeInput.addEventListener(
-            "input",
-            () => {
-
-                rowData.flightTime =
-                    flightTimeInput.value;
-
-                updateFlightTimeTotal();
-            }
-        );
-
-        flightTimeInput.addEventListener(
-            "blur",
-            () => {
-
-                const formattedValue =
-                    normalizeFlightTimeInput(
-                        flightTimeInput.value
-                    );
-
-                flightTimeInput.value =
-                    formattedValue;
-
-                rowData.flightTime =
-                    formattedValue;
-
-                updateFlightTimeTotal();
-            }
-        );
-
-        flightTimeInput.addEventListener(
-            "keydown",
-            (event) => {
-
-                if (event.key !== "Enter") {
-                    return;
-                }
-
-                event.preventDefault();
-
-                moveToNextTimeInput(
-                    flightTimeInput
-                );
-            }
-        );
-
-        pusInput.type = "text";
-
-        pusInput.value =
-            rowData.pus;
-
-        pusInput.className =
-            "flight-time-input";
-
-        pusInput.dataset.row =
-            rowData.row;
-
-        pusInput.addEventListener(
-            "input",
-            () => {
-
-                rowData.pus =
-                    pusInput.value;
-            }
-        );
-
-        pusInput.addEventListener(
-            "blur",
-            () => {
-
-                const formattedValue =
-                    normalizeFlightTimeInput(
-                        pusInput.value
-                    );
-
-                pusInput.value =
-                    formattedValue;
-
-                rowData.pus =
-                    formattedValue;
-            }
-        );
-
-        pusInput.addEventListener(
-            "keydown",
-            (event) => {
-
-                if (event.key !== "Enter") {
-                    return;
-                }
-
-                event.preventDefault();
-
-                moveToNextTimeInput(
-                    pusInput
-                );
-            }
-        );
-                
-        flightTimeCell.appendChild(
-            flightTimeInput
-        );
-
-        pusCell.appendChild(
-            pusInput
-        );
 
         tableRow.appendChild(
             rowNumberCell
         );
 
-        tableRow.appendChild(
-            flightTimeCell
-        );
+        timeColumns.forEach((column) => {
 
-        tableRow.appendChild(
-            pusCell
-        );
+            tableRow.appendChild(
+                createTimeInputCell(
+                    rowData,
+                    column.property,
+                    column.update
+                )
+            );
+
+        });
 
         flightTimeTableBody.appendChild(
             tableRow
         );
-
-        totalMinutes +=
-            flightTimeToMinutes(
-                rowData.flightTime
-            );
     });
 
     updateFlightTimeTotal();
+    updatePusTotal();
+}
+
+function createTimeInputCell(
+    rowData,
+    propertyName,
+    updateTotal
+) {
+
+    const cell =
+        document.createElement("td");
+
+    const input =
+        document.createElement("input");
+
+    input.type = "text";
+
+    input.value =
+        rowData[propertyName] || "";
+
+    input.className =
+        "flight-time-input";
+
+    input.dataset.row =
+        rowData.row;
+
+    input.addEventListener(
+        "input",
+        () => {
+
+            rowData[propertyName] =
+                input.value;
+
+            updateTotal();
+        }
+    );
+
+    input.addEventListener(
+        "blur",
+        () => {
+
+            const formattedValue =
+                normalizeFlightTimeInput(
+                    input.value
+                );
+
+            input.value =
+                formattedValue;
+
+            rowData[propertyName] =
+                formattedValue;
+
+            updateTotal();
+        }
+    );
+
+    input.addEventListener(
+        "keydown",
+        (event) => {
+
+            if (event.key !== "Enter") {
+                return;
+            }
+
+            event.preventDefault();
+
+            moveToNextTimeInput(
+                input
+            );
+        }
+    );
+
+    cell.appendChild(input);
+
+    return cell;
 }
 
 function normalizeFlightTimeInput(value) {
@@ -349,7 +310,16 @@ function normalizeFlightTimeInput(value) {
     const minutes =
         digits.slice(-2);
 
-    return `${Number(hours)}:${minutes}`;
+    if (minutes >= 60) {
+        return "";
+    }
+
+    return (
+        hours +
+        ":" +
+        String(minutes).padStart(2, "0")
+    );
+
 }
 
 function moveToNextTimeInput(currentInput) {
@@ -423,6 +393,22 @@ function updateFlightTimeTotal() {
     });
 
     flightTimeTotalValue.textContent =
+        minutesToFlightTime(totalMinutes);
+}
+
+function updatePusTotal() {
+
+    let totalMinutes = 0;
+
+    flightTimeRows.forEach((rowData) => {
+
+        totalMinutes +=
+            flightTimeToMinutes(
+                rowData.pus
+            );
+    });
+
+    pusTotalValue.textContent =
         minutesToFlightTime(totalMinutes);
 }
 
