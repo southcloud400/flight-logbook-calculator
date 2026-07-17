@@ -41,6 +41,11 @@ const pusTotalValue =
         "pus-total-value"
     );
 
+const copilotTotalValue =
+    document.getElementById(
+        "copilot-total-value"
+    );
+
 const WORKER_URL =
     "https://flight-logbook-worker.just-966.workers.dev";
 
@@ -53,6 +58,10 @@ const timeColumns = [
         {
             property: "pus",
             update: updatePusTotal
+        },
+        {
+            property: "copilot",
+            update: updateCopilotTotal
         }
 ];
 
@@ -116,38 +125,47 @@ readButton.addEventListener("click", async () => {
     readButton.textContent = "Reading...";
 
     try {
-        const imageData =
-            await fileToDataUrl(selectedLeftImageFile);
-
-        const response =
-            await fetch(WORKER_URL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    image: imageData
-                })
-            });
-
-        const result =
-            await response.json();
+        const leftResult =
+            await readLogbookPage(
+                selectedLeftImageFile,
+                "left"
+            );
 
         console.log(
-            "Worker response:",
-            result
+            "Left page response:",
+            leftResult
         );
-
-        if (!response.ok) {
-            throw new Error(
-                result.error ||
-                "読み取りに失敗しました。"
-            );
-        }
 
         displayFlightTimes(
-            result.data.rows
+            leftResult.data.rows
         );
+
+        if (selectedRightImageFile) {
+
+            const rightResult =
+                await readLogbookPage(
+                    selectedRightImageFile,
+                    "right"
+                );
+
+            console.log(
+                "Right page response:",
+                rightResult
+            );
+
+            mergeCopilotRows(
+                rightResult.data.rows
+            );
+
+            displayFlightTimes(
+                flightTimeRows
+            );
+
+            console.log(
+                "Merged rows:",
+                flightTimeRows
+            );
+        }
 
     } catch (error) {
         console.error(
@@ -163,6 +181,36 @@ readButton.addEventListener("click", async () => {
             "Read Flight Time";
     }
 });
+
+async function readLogbookPage(imageFile, page) {
+
+    const imageData =
+        await fileToDataUrl(imageFile);
+
+    const response =
+        await fetch(WORKER_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                image: imageData,
+                page: page
+            })
+        });
+
+    const result =
+        await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            result.error ||
+            `${page}ページの読み取りに失敗しました。`
+        );
+    }
+
+    return result;
+}
 
 
 function fileToDataUrl(file) {
@@ -193,6 +241,7 @@ function displayFlightTimes(rows) {
     flightTimeTableBody.innerHTML = "";
     flightTimeTotalValue.textContent = "0:00";
     pusTotalValue.textContent = "0:00";
+    copilotTotalValue.textContent = "0:00";
 
     if (
         !Array.isArray(rows) ||
@@ -247,6 +296,30 @@ function displayFlightTimes(rows) {
 
     updateFlightTimeTotal();
     updatePusTotal();
+    updateCopilotTotal();
+}
+
+function mergeCopilotRows(rightRows) {
+
+    if (!Array.isArray(rightRows)) {
+        return;
+    }
+
+    rightRows.forEach((rightRow) => {
+
+        const matchingRow =
+            flightTimeRows.find(
+                rowData =>
+                    rowData.row === rightRow.row
+            );
+
+        if (!matchingRow) {
+            return;
+        }
+
+        matchingRow.copilot =
+            rightRow.copilot || "";
+    });
 }
 
 function createTimeInputCell(
@@ -390,6 +463,10 @@ function moveToNextTimeInput(currentInput) {
 
 function flightTimeToMinutes(flightTime) {
 
+    if (typeof flightTime !== "string") {
+        return 0;
+    }
+
     const parts =
         flightTime.split(":");
 
@@ -445,6 +522,22 @@ function updatePusTotal() {
     });
 
     pusTotalValue.textContent =
+        minutesToFlightTime(totalMinutes);
+}
+
+function updateCopilotTotal() {
+
+    let totalMinutes = 0;
+
+    flightTimeRows.forEach((rowData) => {
+
+        totalMinutes +=
+            flightTimeToMinutes(
+                rowData.copilot
+            );
+    });
+
+    copilotTotalValue.textContent =
         minutesToFlightTime(totalMinutes);
 }
 
